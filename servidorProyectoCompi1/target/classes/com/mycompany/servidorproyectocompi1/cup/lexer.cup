@@ -1,0 +1,154 @@
+/*SECCION CODIGO DE USUARIO*/
+class Parser;
+
+ parser code{:
+
+      //variables
+      String mundo;
+      int filas=-1;
+      double columna=-1;  
+      String boxColor;
+      String boxOnTargetColor;
+      String targetColor;
+      String brickColor;
+      String hallColor;
+      String undefinedColor;
+      String playerColor;
+      int num1;
+      int num2;
+      String tipo;
+      double numBoxes1;
+      double numBoxes2;
+      double numTarg1;
+      double numTarg2;
+      double numPlayer1;
+      double numPlayer2;
+
+
+      //CONSTRUCTOR, QUE RECIBE UNA CLASE FLEX INBOCANDO A MI ANALIZADOR SINTACTICO
+     public Parser(Lexer lexer){
+      super(lexer);       
+     }
+
+ :};
+
+
+/*SECCION DE TERMINALES*/
+terminal NAME, ROWS, COLS, CONFIG, BOX_COLOR, BOX_ON_TARGET_COLOR, TARGET_COLOR, BRICK_COLOR, HALL_COLOR, UNDEFINED_COLOR, PLAYER_COLOR;
+terminal BOARD, POSX, POSY, TYPE, BOXES, TARGETS, PLAYES, FLOOR, CEIL, ENTERO, DECIMAL, COLOR, TABLERO, MULTIPLICACION, DIVISION, SUMA, RESTA;
+terminal LLAVE_ABIERTA, LLAVE_CERRADA, COMA, DOS_PUNTOS, PARENTESIS_ABIERTO, PARENTESIS_CERRADO, CORCHETE_ABIERTO, CORCHETE_CERRADO, COMILLA,BRICK, HALL,ERROR;
+
+/*SECCION DE NO TERMINALES*/
+non terminal inicio, aux,  m, r, num, aprox, operacion, c, con, palabra, x, b, p, board, pos, tipo, bo, boxes, box, pal, targets, tar, ta, t, otro, player, play, pl;
+
+
+/*GRAMATICAS*/
+/*Las llaves de inicio*/
+inicio::= LLAVE_ABIERTA otro LLAVE_CERRADA
+    ;
+aux ::= m {::}
+        |r {::}
+        |c {::}
+        |con {::}
+        |b {::}
+        |bo {::}
+        |targets {::}
+        |player {::}
+    ;
+otro::= aux COMA otro| aux {::} 
+    ;  
+
+/*GRAMATICA DE NAME*/
+m ::= COMILLA NAME COMILLA DOS_PUNTOS COMILLA TABLERO:mundo COMILLA {:mundo=mundo.toString();:}
+    ;
+
+/*GRAMATICA DE ROWS*/
+r ::= COMILLA ROWS COMILLA DOS_PUNTOS COMILLA operacion:numeroRows COMILLA {:filas=Integer.valueOf(numeroRows.toString());:}
+     ;
+     
+/*GRAMATICA PARA REALIZAR LAS OPERACIONES*/
+operacion ::= operacion:numero1 SUMA num:numero2   {:RESULT=(double(numero1)+double(numero2));:}
+    | operacion:num1 RESTA num:num2          {:RESULT=(double(num2)-double(num2));:}
+    | operacion:n1 MULTIPLICACION num:n2   {:RESULT=(double(n1)*double(n2));:}
+ 	| operacion:num_1 DIVISION num:num_2        {:RESULT=(double(num_1)/(num_2));:}
+    | num:numero {:RESULT=numero;:}
+    |FLOOR PARENTESIS_ABIERTO operacion:resultado PARENTESIS_CERRADO{:RESUL=Math.floor(double(resultado));:}
+    |CEIL PARENTESIS_ABIERTO operacion:resultado PARENTESIS_CERRADO {:RESULT=Math.ceil(double(resultado));:}
+    ;
+num::=ENTERO:numeroEntero {:RESULT=numeroEntero;:}
+    |DECIMAL:numeroDecimal {:RESULT=numeroDecimal;:}
+    |PARENTESIS_ABIERTO operacion:Numero PARENTESIS_CERRADO {:RESULT=Numero;:}
+    ;
+
+
+/*GRAMATICA COLS*/
+c ::= COMILLA COLS COMILLA DOS_PUNTOS operacion:columna COMILLA  {:columna=double.valueOf(columna.toString());:}
+    ;
+
+/*GRAMATICA CONFIG*/
+con ::= COMILLA CONFIG COMILLA DOS_PUNTOS LLAVE_ABIERTA x LLAVE_CERRADA{::}
+        ;   
+  x :: = palabra COMA x | palabra {::}
+        ;    
+palabra ::=  COMILLA BOX_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:boxColor COMILLA {:boxColor=boxColor.toString();:}
+            |COMILLA BOX_ON_TARGET_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:boxOnTargetColor COMILLA{:boxOnTargetColor=boxOnTargetColor.toString();:}
+            |COMILLA TARGET_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:targetColor COMILLA {:targetColor=targetColor.toString();:}
+            |COMILLA BRICK_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:brickColor COMILLA {:brickColor=brickColor.toString();:}
+            |COMILLA HALL_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:hallColor COMILLA {:hallColor=hallColor.toString();:}
+            |COMILLA UNDEFINED_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:undefinedColor COMILLA {:undefinedColor=undefinedColor.toString();:}
+            |COMILLA PLAYER_COLOR COMILLA DOS_PUNTOS COMILLA COLOR:playerColor COMILLA {:playerColor=playerColor.toString();:}
+            ;     
+
+/*GRAMATICA BOARD*/
+b ::= COMILLA BOARD COMILLA DOS_PUNTOS CORCHETE_ABIERTO board CORCHETE_CERRADO {::}
+    ;
+
+board::= LLAVE_ABIERTA COMILLA p  LLAVE_CERRADA {::}
+    ;
+
+p ::= pos COMA p | pos {::}
+    ;
+
+pos ::= COMILLA POSX COMILLA DOS_PUNTOS ENTERO:num1 {:num1=Integer.valueOf(num1.toString());:}
+      | COMILLA POSY COMILLA DOS_PUNTOS operacion:num2 {:num2=double.valueOf(num2.toString());:}
+      | COMILLA TYPE COMILLA DOS_PUNTOS COMILLA tipo:tipo COMILLA{:tipo=tipo.toString();:}
+      ;
+
+tipo ::= BRICK {::}
+       |HALL {::}
+       ;
+
+/*GRAMATICA DE BOXES*/       
+bo ::= COMILLA BOXES COMILLA DOS_PUNTOS CORCHETE_ABIERTO boxes CORCHETE_CERRADO {::}
+    ;
+
+boxes::= LLAVE_ABIERTA box LLAVE_CERRADA {::}
+    ;
+box ::= pal COMA box | pal {::}
+    ;   
+pal ::=COMILLA POSX COMILLA DOS_PUNTOS operacion:numBoxes1 {:numBoxes1=double.valueOf(numBoxes1.toString());:}
+     | COMILLA POSY COMILLA DOS_PUNTOS operacion:numoBoxes2 {:numBoxes2=double.valueOf(numoBoxes2.toString());:}
+     ;  
+
+/*GRAMATICA TARGETS*/
+targets::= COMILLA TARGETS COMILLA DOS_PUNTOS CORCHETE_ABIERTO tar CORCHETE_CERRADO {::}
+   ;
+tar::=LLAVE_ABIERTA ta LLAVE_CERRADA {::}
+    ;
+ta::= t COMA ta| t {::}
+    ;
+t::= COMILLA POSX COMILLA DOS_PUNTOS operacion:numTarg1 {:numTarg1=numTarg.valueOf(toString());:}
+    | COMILLA POSY COMILLA DOS_PUNTOS operacion:numTarg2 {:numTarg2=numTarg.valueOf(toString());:}
+    ;          
+
+
+/*GRAMATICA PLAYER*/
+player ::= COMILLA PLAYER COMILLA DOS_PUNTOS LLAVE_ABIERTA play LLAVE_CERRADA {::}
+        ;
+play::= pl COMA play| pl {::}
+    ;
+pl::= COMILLA POSX COMILLA DOS_PUNTOS operacion:numPlayer1 {:numPlayer1=numPlayer1.valueOf(toString());:}
+    | COMILLA POSY COMILLA DOS_PUNTOS operacion:numPlayer2 {:numPlayer2=numPlayer2.valueOf(toString());:}
+    ;    
+
+
